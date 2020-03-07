@@ -2,8 +2,8 @@
   "name": "markup-as-js",
   "version": "1.0.0",
   "description": "A library that provides Flutter-like functions for creating DOM nodes",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
