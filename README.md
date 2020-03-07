@@ -4,10 +4,10 @@ A tiny, no-dependency library that provides simple functions for creating DOM no
 ## Example Usage
 ```js
 div(
-  {class: "foobar"}, 
-  p(null,
-    "I ", 
-    b(null, 
+  {class: "foobar"}, //This is a set of key-value pairs representing the attributes of this node
+  p(null, //This node has no attributes
+    "I ", //String children are automatically converted to TextNodes
+    b(null, //This node also has no attributes
       "really"
     ), 
     " like cheese 🧀"
