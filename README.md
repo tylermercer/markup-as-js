@@ -1,2 +1,2 @@
-# markup-as-ts
-A TypeScript library that provides Flutter-like functions for creating DOM nodes
+# markup-as-js
+A library that provides simple functions for creating DOM nodes, inspired by Flutter.
