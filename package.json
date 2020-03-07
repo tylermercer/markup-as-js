@@ -1,14 +1,15 @@
 {
-  "name": "markup-as-ts",
+  "name": "markup-as-js",
   "version": "1.0.0",
-  "description": "A TypeScript library that provides Flutter-like functions for creating DOM nodes",
-  "main": "index.js",
+  "description": "A library that provides Flutter-like functions for creating DOM nodes",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tylermercer/markup-as-ts.git"
+    "url": "git+https://github.com/tylermercer/markup-as-js.git"
   },
   "keywords": [
     "typescript",
@@ -17,7 +18,7 @@
   "author": "Tyler Mercer",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tylermercer/markup-as-ts/issues"
+    "url": "https://github.com/tylermercer/markup-as-js/issues"
   },
-  "homepage": "https://github.com/tylermercer/markup-as-ts#readme"
+  "homepage": "https://github.com/tylermercer/markup-as-js#readme"
 }
