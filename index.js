@@ -2,7 +2,12 @@ function nodeCreator(nodeName) {
   return function (attributes, ...children) {
       let el = document.createElement(nodeName);
       for (let attr of Object.keys(attributes)) {
-        el.setAttribute(attr, attributes[attr]);
+        if (typeof attributes[attr] === "function") {
+          el[attr] = attributes[attr]
+        }
+        else {
+          el.setAttribute(attr, attributes[attr]);
+        }
       }
       for (let child of children) {
         if (typeof child === "string") {
