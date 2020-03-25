@@ -14,9 +14,9 @@ import { div, p, b } from 'markup-as-js';
 
 let el = div(
   {class: "foobar"}, //This is a set of key-value pairs representing the attributes of this node
-  p(null, //This node has no attributes
+  p(
     "I ", //String children are automatically converted to TextNodes
-    b(null, //This node also has no attributes
+    b(
       "really"
     ), 
     " like cheese 🧀"
