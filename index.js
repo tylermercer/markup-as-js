@@ -1,12 +1,23 @@
 function nodeCreator(nodeName) {
   return function (attributes, ...children) {
       let el = document.createElement(nodeName);
-      for (let attr of Object.keys(attributes)) {
-        if (typeof attributes[attr] === "function") {
-          el[attr] = attributes[attr]
-        }
-        else {
-          el.setAttribute(attr, attributes[attr]);
+      if (typeof attributes !== 'object' && typeof attributes !== 'string') {
+        throw Error("Expected first parameter to be type object or string, got " + typeof attributes);
+      }
+      if (attributes instanceof Element) {
+        el.appendChild(attributes);
+      }
+      else if (typeof attributes === 'string') {
+        el.appendChild(document.createTextNode(attributes));
+      }
+      else {
+        for (let attr of Object.keys(attributes)) {
+          if (typeof attributes[attr] === "function") {
+            el[attr] = attributes[attr]
+          }
+          else {
+            el.setAttribute(attr, attributes[attr]);
+          }
         }
       }
       for (let child of children) {
