@@ -1,31 +1,64 @@
-function nodeCreator(nodeName) {
-  return function (attributes, ...children) {
+import { Observable } from './observable';
+
+interface Attributes {
+  [index: string]: string|Function|Observable<string>
+}
+
+function isStringObservable(thing: Observable<string> | any): thing is Observable<string> {
+  return (<Observable<string>>thing).subscribe !== undefined;
+}
+
+function isHTMLElementObservable(thing: Observable<HTMLElement> | any): thing is Observable<HTMLElement> {
+  return (<Observable<HTMLElement>>thing).subscribe !== undefined;
+}
+
+function nodeCreator(nodeName: string) {
+  return function (attributes: Attributes|HTMLElement|Observable<string|HTMLElement>|string, ...children: Array<HTMLElement|string|Observable<string|HTMLElement>>) : HTMLElement {
       let el = document.createElement(nodeName);
-      if (typeof attributes !== 'object' && typeof attributes !== 'string') {
-        throw Error("Expected first parameter to be type object or string, got " + typeof attributes);
-      }
-      if (attributes instanceof Element) {
-        el.appendChild(attributes);
-      }
-      else if (typeof attributes === 'string') {
-        el.appendChild(document.createTextNode(attributes));
-      }
-      else {
-        for (let attr of Object.keys(attributes)) {
-          if (typeof attributes[attr] === "function") {
-            el[attr] = attributes[attr]
+
+      let allChildren: Array<HTMLElement|string|Observable<string|HTMLElement>>;
+      if (!(
+        typeof attributes === 'string' || 
+        attributes instanceof HTMLElement || 
+        isStringObservable(attributes) || 
+        isHTMLElementObservable(attributes)
+        )) {
+        let _attributes = attributes as Attributes;
+        Object.keys(_attributes).forEach((key:string) => {
+          let value = _attributes[key];
+          if (typeof value === "function") {
+            //TODO: Implement
           }
-          else {
-            el.setAttribute(attr, attributes[attr]);
+          else if (isStringObservable(value)) {
+            value.subscribe((newValue: string) => el.setAttribute(key, newValue));
           }
-        }
+          else if (typeof value === 'string') {
+            el.setAttribute(key, value);
+          }
+        })
+        allChildren = children;
+      } else {
+        allChildren = [attributes, ...children];
       }
-      for (let child of children) {
+      for (let child of allChildren) {
         if (typeof child === "string") {
           el.appendChild(document.createTextNode(child))
         }
-        else {
+        else if (child instanceof HTMLElement) {
           el.appendChild(child);
+        }
+        else {
+          if (isHTMLElementObservable(child)) {
+            let childNode: HTMLElement|Text = document.createTextNode("");
+            child.subscribe((newValue: HTMLElement) => {
+              el.replaceChild(newValue, childNode);
+              childNode = newValue;
+            });
+          }
+          else if (isStringObservable(child)) {
+            let childNode: Text = document.createTextNode("");
+            child.subscribe((newValue: string) => childNode.nodeValue = newValue);
+          }
         }
       }
       return el;
