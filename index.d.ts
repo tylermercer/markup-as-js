@@ -6,6 +6,7 @@ declare namespace lib {
     constructor(initialVal: T);
     set(newVal: T): void;
     subscribe(handler: (newVal: T) => void): void;
+    value: T;
   }
   function nodeCreator(nodeName: keyof HTMLElementTagNameMap): (attributes?: object|string|Observable<HTMLElement|string>, ...children: Array<HTMLElement|string|Observable<HTMLElement|string>>) => HTMLElement;
   function a(attributes?: object|string|Observable<HTMLElement|string>, ...children: Array<HTMLElement|string|Observable<HTMLElement|string>>): HTMLElement;

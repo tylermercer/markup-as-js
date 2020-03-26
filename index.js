@@ -11,10 +11,18 @@ function nodeCreator(nodeName) {
             el[attr] = value;
           }
           else if (typeof value.subscribe === 'function') {
-            value.subscribe(v => el.setAttribute(attr, v));
+            value.subscribe(v => {
+              console.log("updated: ", v);
+              if (v === false) {
+                el.removeAttribute(attr);
+              }
+              else {
+                el.setAttribute(attr, v);
+              }
+            });
           } 
           else {
-            el.setAttribute(attr, attributes[attr]);
+            el.setAttribute(attr, value);
           }
         }
         allChildren = children;
