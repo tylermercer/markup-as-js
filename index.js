@@ -1,38 +1,100 @@
+function updateAttribute(el, attr, v) {
+  if (v === false) {
+    el.removeAttribute(attr);
+  }
+  else {
+    el.setAttribute(attr, v);
+  }
+}
+
 function nodeCreator(nodeName) {
   return function (attributes, ...children) {
       let el = document.createElement(nodeName);
-      if (typeof attributes !== 'object' && typeof attributes !== 'string') {
-        throw Error("Expected first parameter to be type object or string, got " + typeof attributes);
-      }
-      if (attributes instanceof Element) {
-        el.appendChild(attributes);
-      }
-      else if (typeof attributes === 'string') {
-        el.appendChild(document.createTextNode(attributes));
-      }
-      else {
+
+      let allChildren;
+      if (!(attributes instanceof Element || typeof attributes.subscribe === 'function' || typeof attributes === 'string')) {
+        //It's an attributes map
         for (let attr of Object.keys(attributes)) {
-          if (typeof attributes[attr] === "function") {
-            el[attr] = attributes[attr]
+          let value = attributes[attr];
+          if (typeof value === "function") {
+            el[attr] = value;
+          }
+          else if (typeof value.subscribe === 'function') {
+            value.subscribe(v => updateAttribute(el, attr, v));
+          }
+          else if (typeof value.then === 'function') {
+            value.then(v => updateAttribute(el, attr, v));
           }
           else {
-            el.setAttribute(attr, attributes[attr]);
+            el.setAttribute(attr, value);
           }
         }
+        allChildren = children;
       }
-      for (let child of children) {
+      else {
+        allChildren = [attributes, ...children];
+      }
+
+      for (let child of allChildren) {
         if (typeof child === "string") {
           el.appendChild(document.createTextNode(child))
         }
-        else {
+        else if (typeof child.subscribe === 'function') {
+          let currentChild = document.createTextNode("");
+          el.appendChild(currentChild);
+          child.subscribe(newVal => {
+            if (newVal instanceof Element) {
+              el.replaceChild(newVal, currentChild);
+              currentChild = newVal;
+            }
+            else {
+              let tmp = document.createTextNode(`${newVal}`);
+              el.replaceChild(tmp, currentChild);
+              currentChild = tmp;
+            }
+          });
+        }
+        else if (typeof child.then === 'function') {
+          let currentChild = document.createTextNode("");
+          el.appendChild(currentChild);
+          child.then(newVal => {
+            if (newVal instanceof Element) {
+              el.replaceChild(newVal, currentChild);
+            }
+            else {
+              el.replaceChild(document.createTextNode(`${newVal}`), currentChild);
+            }
+          });
+        }
+        else if (child instanceof Element) {
           el.appendChild(child);
+        }
+        else {
+          throw Error("Expected children to each be Element, string, Observable, or Thenable");
         }
       }
       return el;
   }
 }
 
+class SimpleObservable {
+  constructor(initialValue) {
+    this.value = initialValue;
+    this.watchers = [];
+  }
+  subscribe(handler) {
+    handler(this.value);
+    this.watchers.push(handler);
+  }
+  set(newVal) {
+    this.value = newVal;
+    this.watchers.forEach(w => w(newVal));
+  }
+}
+
+
 module.exports = {
+  SimpleObservable,
   nodeCreator,
   a: nodeCreator("a"),
   abbr: nodeCreator("abbr"),

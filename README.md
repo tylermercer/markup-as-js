@@ -29,3 +29,30 @@ The above snippet creates an HTMLElement containing the following:
 ```html
 <div class="foobar"><p>I <b>really</b> like cheese 🧀</p></div>
 ```
+
+## Observables and Thenables
+Observables (things that implement `.subscribe()`) and Thenables (things that implement `.then()`, like ES6 Promises) can be passed as node children or attribute values.
+
+When the value is updated (for observables) or resolves (for thenables), the DOM node or attribute that the observable was passed to will be updated. This facilitates reactive programming. For example:
+
+```
+const counter = new SimpleObservable(0);
+const isTen = new SimpleObservable(false);
+counter.subscribe(v => isTen.set(v === 10));
+
+return div(
+  p(
+    counter,
+  ),
+  button(
+    {
+      onclick: () => counter.set(counter.value + 1),
+      disabled: isTen,
+    },
+    "Increment"
+  ),
+  new Promise(resolve => setTimeout(() => resolve("This text node shows up after five seconds"), 5000))
+);
+```
+
+(`SimpleObservable` is a class provided by this library that is, unsurprisingly, a simple observable. It has `subscribe` and `set` methods and a `value` property, and the constructor takes the initial value.)
