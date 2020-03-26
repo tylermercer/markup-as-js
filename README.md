@@ -35,7 +35,7 @@ Observables (things that implement `.subscribe()`) and Thenables (things that im
 
 When the value is updated (for observables) or resolves (for thenables), the DOM node or attribute that the observable was passed to will be updated. This facilitates reactive programming. For example:
 
-```
+```js
 const counter = new SimpleObservable(0);
 const isTen = new SimpleObservable(false);
 counter.subscribe(v => isTen.set(v === 10));
