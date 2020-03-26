@@ -1,3 +1,12 @@
+function updateAttribute(el, attr, v) {
+  if (v === false) {
+    el.removeAttribute(attr);
+  }
+  else {
+    el.setAttribute(attr, v);
+  }
+}
+
 function nodeCreator(nodeName) {
   return function (attributes, ...children) {
       let el = document.createElement(nodeName);
@@ -11,16 +20,11 @@ function nodeCreator(nodeName) {
             el[attr] = value;
           }
           else if (typeof value.subscribe === 'function') {
-            value.subscribe(v => {
-              console.log("updated: ", v);
-              if (v === false) {
-                el.removeAttribute(attr);
-              }
-              else {
-                el.setAttribute(attr, v);
-              }
-            });
-          } 
+            value.subscribe(v => updateAttribute(el, attr, v));
+          }
+          else if (typeof value.then === 'function') {
+            value.then(v => updateAttribute(el, attr, v));
+          }
           else {
             el.setAttribute(attr, value);
           }
@@ -50,11 +54,23 @@ function nodeCreator(nodeName) {
             }
           });
         }
+        else if (typeof child.then === 'function') {
+          let currentChild = document.createTextNode("");
+          el.appendChild(currentChild);
+          child.then(newVal => {
+            if (newVal instanceof Element) {
+              el.replaceChild(newVal, currentChild);
+            }
+            else {
+              el.replaceChild(document.createTextNode(`${newVal}`), currentChild);
+            }
+          });
+        }
         else if (child instanceof Element) {
           el.appendChild(child);
         }
         else {
-          throw Error("Expected children to each be Element, string, or Observable");
+          throw Error("Expected children to each be Element, string, Observable, or Thenable");
         }
       }
       return el;
