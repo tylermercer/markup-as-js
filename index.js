@@ -53,7 +53,24 @@ function nodeCreator(nodeName) {
   }
 }
 
+class SimpleObservable {
+  constructor(initialValue) {
+    this.value = initialValue;
+    this.watchers = [];
+  }
+  subscribe(handler) {
+    handler(this.value);
+    this.watchers.push(handler);
+  }
+  set(newVal) {
+    this.value = newVal;
+    this.watchers.forEach(w => w(newVal));
+  }
+}
+
+
 module.exports = {
+  SimpleObservable,
   nodeCreator,
   a: nodeCreator("a"),
   abbr: nodeCreator("abbr"),

@@ -2,6 +2,11 @@ declare namespace lib {
   interface Observable<T> {
     subscribe(handler: (newVal: T) => void): void;
   }
+  class SimpleObservable<T> implements Observable<T> {
+    constructor(initialVal: T);
+    set(newVal: T): void;
+    subscribe(handler: (newVal: T) => void): void;
+  }
   function nodeCreator(nodeName: keyof HTMLElementTagNameMap): (attributes?: object|string|Observable<HTMLElement|string>, ...children: Array<HTMLElement|string|Observable<HTMLElement|string>>) => HTMLElement;
   function a(attributes?: object|string|Observable<HTMLElement|string>, ...children: Array<HTMLElement|string|Observable<HTMLElement|string>>): HTMLElement;
   function abbr(attributes?: object|string|Observable<HTMLElement|string>, ...children: Array<HTMLElement|string|Observable<HTMLElement|string>>): HTMLElement;
