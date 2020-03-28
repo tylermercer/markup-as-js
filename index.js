@@ -43,45 +43,57 @@ function nodeCreator(nodeName) {
       }
 
       for (let child of allChildren) {
-        if (isString(child)) {
-          el.appendChild(document.createTextNode(child))
-        }
-        else if (isSubscribable(child)) {
-          let currentChild = document.createTextNode("");
-          el.appendChild(currentChild);
-          child.subscribe(newVal => {
-            if (newVal instanceof Element) {
-              el.replaceChild(newVal, currentChild);
-              currentChild = newVal;
-            }
-            else {
-              let tmp = document.createTextNode(`${newVal}`);
-              el.replaceChild(tmp, currentChild);
-              currentChild = tmp;
-            }
-          });
-        }
-        else if (isThenable(child)) {
-          let currentChild = document.createTextNode("");
-          el.appendChild(currentChild);
-          child.then(newVal => {
-            if (newVal instanceof Element) {
-              el.replaceChild(newVal, currentChild);
-            }
-            else {
-              el.replaceChild(document.createTextNode(`${newVal}`), currentChild);
-            }
-          });
-        }
-        else if (child instanceof Element) {
-          el.appendChild(child);
-        }
-        else {
-          throw Error("Expected children to each be Element, string, Observable, or Thenable");
-        }
+        renderChild(el, child);
       }
       return el;
   }
+}
+
+function renderChild(el, child) {
+  if (isString(child)) {
+    el.appendChild(document.createTextNode(child))
+  }
+  else if (isSubscribable(child)) {
+    renderSubscribableChild(el, child);
+  }
+  else if (isThenable(child)) {
+    renderThenableChild(el, child);
+  }
+  else if (child instanceof Element) {
+    el.appendChild(child);
+  }
+  else {
+    throw Error("Expected children to each be Element, string, Observable, or Thenable");
+  }
+}
+
+function renderSubscribableChild(el, child) {
+  let currentChild = document.createTextNode("");
+  el.appendChild(currentChild);
+  child.subscribe(newVal => {
+    if (newVal instanceof Element) {
+      el.replaceChild(newVal, currentChild);
+      currentChild = newVal;
+    }
+    else {
+      let tmp = document.createTextNode(`${newVal}`);
+      el.replaceChild(tmp, currentChild);
+      currentChild = tmp;
+    }
+  });
+}
+
+function renderThenableChild(el, child) {
+  let currentChild = document.createTextNode("");
+  el.appendChild(currentChild);
+  child.then(newVal => {
+    if (newVal instanceof Element) {
+      el.replaceChild(newVal, currentChild);
+    }
+    else {
+      el.replaceChild(document.createTextNode(`${newVal}`), currentChild);
+    }
+  });
 }
 
 class SimpleObservable {
