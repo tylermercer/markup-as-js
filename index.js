@@ -7,22 +7,29 @@ function updateAttribute(el, attr, v) {
   }
 }
 
+const isChild = x => isElement(x) || isSubscribable(x) || isString(x);
+const isElement = x => x instanceof Element;
+const isFunction = x => typeof x === 'function';
+const isThenable = x => typeof x.then === 'function'
+const isSubscribable = x => typeof x.subscribe === 'function';
+const isString = x => typeof x === 'string';
+
 function nodeCreator(nodeName) {
   return function (attributes, ...children) {
       let el = document.createElement(nodeName);
 
       let allChildren;
-      if (!(attributes instanceof Element || typeof attributes.subscribe === 'function' || typeof attributes === 'string')) {
+      if (!isChild(attributes)) {
         //It's an attributes map
         for (let attr of Object.keys(attributes)) {
           let value = attributes[attr];
-          if (typeof value === "function") {
+          if (isFunction(value)) {
             el[attr] = value;
           }
-          else if (typeof value.subscribe === 'function') {
+          else if (isSubscribable(value)) {
             value.subscribe(v => updateAttribute(el, attr, v));
           }
-          else if (typeof value.then === 'function') {
+          else if (isThenable(value)) {
             value.then(v => updateAttribute(el, attr, v));
           }
           else {
@@ -36,10 +43,10 @@ function nodeCreator(nodeName) {
       }
 
       for (let child of allChildren) {
-        if (typeof child === "string") {
+        if (isString(child)) {
           el.appendChild(document.createTextNode(child))
         }
-        else if (typeof child.subscribe === 'function') {
+        else if (isSubscribable(child)) {
           let currentChild = document.createTextNode("");
           el.appendChild(currentChild);
           child.subscribe(newVal => {
@@ -54,7 +61,7 @@ function nodeCreator(nodeName) {
             }
           });
         }
-        else if (typeof child.then === 'function') {
+        else if (isThenable(child)) {
           let currentChild = document.createTextNode("");
           el.appendChild(currentChild);
           child.then(newVal => {
