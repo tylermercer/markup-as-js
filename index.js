@@ -7,7 +7,7 @@ function updateAttribute(el, attr, v) {
   }
 }
 
-const isChild = x => isElement(x) || isSubscribable(x) || isString(x);
+const isChild = x => isElement(x) || isSubscribable(x) || isThenable(x) || isString(x);
 const isElement = x => x instanceof Element;
 const isFunction = x => typeof x === 'function';
 const isThenable = x => typeof x.then === 'function'
