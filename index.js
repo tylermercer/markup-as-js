@@ -33,7 +33,7 @@ function nodeCreator(nodeName) {
             value.then(v => updateAttribute(el, attr, v));
           }
           else {
-            el.setAttribute(attr, value);
+            updateAttribute(el, attr, value);
           }
         }
         allChildren = children;
