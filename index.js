@@ -120,6 +120,10 @@ class SimpleObservable {
   subscribe(handler) {
     handler(this.value);
     this.watchers.push(handler);
+    let unsub = () => {
+      this.watchers.splice(this.watchers.indexOf(handler), 1);
+    };
+    return unsub;
   }
   set(newVal) {
     this.value = newVal;
