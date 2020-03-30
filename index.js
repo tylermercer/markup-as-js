@@ -13,12 +13,15 @@ const isFunction = x => typeof x === 'function';
 const isThenable = x => typeof x.then === 'function'
 const isSubscribable = x => typeof x.subscribe === 'function';
 const isString = x => typeof x === 'string';
+const isNullOrUndef = x => x == null;
 
 function nodeCreator(nodeName) {
   return function (attributes, ...children) {
       let el = document.createElement(nodeName);
 
       let allChildren;
+      const subscriptions = [];
+
       if (!isChild(attributes)) {
         //It's an attributes map
         for (let attr of Object.keys(attributes)) {
@@ -27,7 +30,7 @@ function nodeCreator(nodeName) {
             el[attr] = value;
           }
           else if (isSubscribable(value)) {
-            value.subscribe(v => updateAttribute(el, attr, v));
+            subscriptions.push(value.subscribe(v => updateAttribute(el, attr, v)));
           }
           else if (isThenable(value)) {
             value.then(v => updateAttribute(el, attr, v));
@@ -43,18 +46,30 @@ function nodeCreator(nodeName) {
       }
 
       for (let child of allChildren) {
-        renderChild(el, child);
+        renderChild(el, child, subscriptions);
       }
+
+      el.teardown = function() {
+        for (let sub of subscriptions) {
+          if (isNullOrUndef(sub)) continue;
+          if (isFunction(sub)) sub();
+          else if (isFunction(sub.unsubscribe)) sub.unsubscribe();
+        }
+        for (let i = 0; i < this.children.length; i++) {
+          if (isFunction(this.children[i].teardown)) this.children[i].teardown();
+        }
+      }
+      
       return el;
   }
 }
 
-function renderChild(el, child) {
+function renderChild(el, child, subscriptions) {
   if (isString(child)) {
     el.appendChild(document.createTextNode(child))
   }
   else if (isSubscribable(child)) {
-    renderSubscribableChild(el, child);
+    renderSubscribableChild(el, child, subscriptions);
   }
   else if (isThenable(child)) {
     renderThenableChild(el, child);
@@ -67,10 +82,10 @@ function renderChild(el, child) {
   }
 }
 
-function renderSubscribableChild(el, child) {
+function renderSubscribableChild(el, child, subscriptions) {
   let currentChild = document.createTextNode("");
   el.appendChild(currentChild);
-  child.subscribe(newVal => {
+  const sub = child.subscribe(newVal => {
     if (newVal instanceof Element) {
       el.replaceChild(newVal, currentChild);
       currentChild = newVal;
@@ -81,6 +96,7 @@ function renderSubscribableChild(el, child) {
       currentChild = tmp;
     }
   });
+  subscriptions.push(sub);
 }
 
 function renderThenableChild(el, child) {
