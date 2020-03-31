@@ -121,7 +121,9 @@ class SimpleObservable {
     handler(this.value);
     this.watchers.push(handler);
     let unsub = () => {
-      this.watchers.splice(this.watchers.indexOf(handler), 1);
+      let index = this.watchers.indexOf(handler);
+      if (index >= 0) this.watchers.splice(index, 1);
+      else console.error("Attempted to unsubscribe from the same observable multiple times.")
     };
     return unsub;
   }
