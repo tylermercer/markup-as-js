@@ -56,3 +56,5 @@ return div(
 ```
 
 (`SimpleObservable` is a class provided by this library that is, unsurprisingly, a simple observable. It has `subscribe` and `set` methods and a `value` property, and the constructor takes the initial value.)
+
+**Important Note:** If you ever discard a node that was passed an observable without also discarding the Observable (including unsubscribing it from any observables it is subscribed to), you must call `.teardown()` on the discarded node. Otherwise, the observable will still have a reference to the discarded node and it will not be garbage-collected, causing a memory leak.
